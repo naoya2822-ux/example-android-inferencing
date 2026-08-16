@@ -113,6 +113,15 @@ class BoundingBoxOverlay(context: Context, attrs: AttributeSet? = null) : View(c
 }
 
 class MainActivity : ComponentActivity() {
+    private var discardCount = 0
+private var recycleCount = 0
+private var totalCount = 0
+
+private var lastDecisionTime = System.currentTimeMillis()
+private var totalSortingTimeMs = 0L
+
+private var lastLabel = ""
+private var decisionLocked = false
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var resultTextView: TextView
@@ -263,6 +272,46 @@ class MainActivity : ComponentActivity() {
         {
             val combinedText = StringBuilder()
             if (result.classification != null) {
+                val bestResult = result.classification.entries.maxByOrNull { it.value }
+
+if (bestResult != null) {
+    val label = bestResult.key
+    val confidence = bestResult.value
+
+    if (confidence >= 0.80f && !decisionLocked) {
+
+        val now = System.currentTimeMillis()
+        val sortingTime = now - lastDecisionTime
+
+        when (label) {
+            "捨てる" -> discardCount++
+            "リサイクル" -> recycleCount++
+        }
+
+        totalCount++
+        totalSortingTimeMs += sortingTime
+
+        val seconds = sortingTime / 1000.0
+        val averageSeconds =
+            (totalSortingTimeMs / totalCount.toDouble()) / 1000.0
+
+        lastLabel = label
+        lastDecisionTime = now
+        decisionLocked = true
+android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+    decisionLocked = false
+}, 1000)
+        combinedText.append(
+            "\n\n判定：$label" +
+            "\n信頼度：${(confidence * 100).toInt()}%" +
+            "\n捨てる：${discardCount}個" +
+            "\nリサイクル：${recycleCount}個" +
+            "\n合計：${totalCount}個" +
+            "\n今回：${"%.1f".format(seconds)}秒" +
+            "\n平均：${"%.1f".format(averageSeconds)}秒"
+        )
+    }
+}
                 // Display classification results
                 val classificationText = result.classification.entries.joinToString("\n") {
                     "${it.key}: ${it.value}"
