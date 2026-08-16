@@ -1,4 +1,4 @@
-package com.example.test_camera
+つpackage com.example.test_camera
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
@@ -362,7 +362,7 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         resultTextView.visibility = View.GONE
     }, 1500)
-        
+    }   
 
     // Load the native library
     init {
