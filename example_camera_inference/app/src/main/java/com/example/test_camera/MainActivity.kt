@@ -197,12 +197,14 @@ private var decisionLocked = false
         // Convert ImageProxy to Bitmap
         val bitmap = imageProxy.toBitmap()
 
-        // Resize the Bitmap to Edge Impulse model size
-        // val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 64, 64, true)
-        // resizing is done in C++ code
+val resizedBitmap = Bitmap.createScaledBitmap(
+    bitmap,
+    480,
+    640,
+    true
+)
 
-        // Convert the resized bitmap to ByteArray
-        val byteArray = getByteArrayFromBitmap(bitmap)
+val byteArray = getByteArrayFromBitmap(resizedBitmap)
 
         // Close the imageProxy after processing
         imageProxy.close()
