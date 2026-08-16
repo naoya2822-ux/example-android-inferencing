@@ -1,4 +1,4 @@
-つpackage com.example.test_camera
+package com.example.test_camera
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
