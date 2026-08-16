@@ -148,10 +148,32 @@ private var decisionLocked = false
             }
         }
 
-        if (!hasCameraPermission()) {
-            requestCameraPermission()
-        } else {
-            startCamera()
+        val startScreen = findViewById<android.view.View>(R.id.startScreen)
+val startCameraButton = findViewById<android.widget.Button>(R.id.startCameraButton)
+val finishWorkButton = findViewById<android.widget.Button>(R.id.finishWorkButton)
+
+startCameraButton.setOnClickListener {
+    if (!hasCameraPermission()) {
+        requestCameraPermission()
+    } else {
+        startScreen.visibility = android.view.View.GONE
+        previewView.visibility = android.view.View.VISIBLE
+        finishWorkButton.visibility = android.view.View.VISIBLE
+        startCamera()
+    }
+}
+
+finishWorkButton.setOnClickListener {
+    val cameraProviderFuture = androidx.camera.lifecycle.ProcessCameraProvider.getInstance(this)
+    val cameraProvider = cameraProviderFuture.get()
+    cameraProvider.unbindAll()
+
+    previewView.visibility = android.view.View.GONE
+    boundingBoxOverlay.visibility = android.view.View.GONE
+    resultTextView.visibility = android.view.View.GONE
+    finishWorkButton.visibility = android.view.View.GONE
+    startScreen.visibility = android.view.View.VISIBLE
+}
         }
 
     }
@@ -185,7 +207,10 @@ private var decisionLocked = false
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCamera()
+                findViewById<android.view.View>(R.id.startScreen).visibility = android.view.View.GONE
+previewView.visibility = android.view.View.VISIBLE
+findViewById<android.widget.Button>(R.id.finishWorkButton).visibility = android.view.View.VISIBLE
+startCamera()
             } else {
                 resultTextView.text = "Camera permission required!"
             }
@@ -266,7 +291,7 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     @SuppressLint("SetTextI18n")
     private fun displayResults(result: InferenceResult?) {
         resultTextView.visibility = View.GONE
-        boundingBoxOverlay.visibility = View.GONE
+        
 
         if (result == null) {
             resultTextView.text = "Error running inference"
@@ -280,17 +305,41 @@ if (bestResult != null) {
     val label = bestResult.key
     val confidence = bestResult.value
 
-    if (confidence >= 0.80f && !decisionLocked) {
+    if (confidence >= 0.80f) {
 
         val now = System.currentTimeMillis()
         val sortingTime = now - lastDecisionTime
 
-        when (label) {
-            "捨てる" -> discardCount++
-            "リサイクル" -> recycleCount++
+    when (label) {
+
+    "捨てる" -> {
+        if (decisionLocked) {
+            return@runOnUiThread
         }
 
+        discardCount++
         totalCount++
+    }
+
+    "販売" -> {
+        if (decisionLocked) {
+            return@runOnUiThread
+        }
+
+        recycleCount++
+        totalCount++
+    }
+
+    "リモコン以外" -> {
+        decisionLocked = false
+        lastLabel = "リモコン以外"
+        return@runOnUiThread
+    }
+
+    else -> {
+        return@runOnUiThread
+    }
+    }
         totalSortingTimeMs += sortingTime
 
         val seconds = sortingTime / 1000.0
@@ -300,9 +349,6 @@ if (bestResult != null) {
         lastLabel = label
         lastDecisionTime = now
         decisionLocked = true
-android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-    decisionLocked = false
-}, 1000)
         combinedText.append(
             "\n\n判定：$label" +
             "\n信頼度：${(confidence * 100).toInt()}%" +
