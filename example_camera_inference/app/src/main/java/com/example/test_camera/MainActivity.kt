@@ -351,6 +351,7 @@ android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             // print the result
             val textToDisplay = combinedText.toString()
             //Log.d("MainActivity", "Result: $textToDisplay")
+            resultTextView.visibility = View.VISIBLE
             resultTextView.text = textToDisplay
         }
     }
