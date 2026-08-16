@@ -290,7 +290,7 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     // Display results in UI
     @SuppressLint("SetTextI18n")
     private fun displayResults(result: InferenceResult?) {
-        private fun displayResults(result: InferenceResult?) {
+        
 
     boundingBoxOverlay.visibility = View.GONE
 
