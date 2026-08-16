@@ -39,7 +39,11 @@ jobs:
 
       - name: Make Gradle executable
         run: chmod +x example_camera_inference/gradlew
-
+      - name: Download TensorFlow Lite libraries
+        run: |
+          cd example_camera_inference/app/src/main/cpp/tflite
+          chmod +x download_tflite_libs.sh
+          sh download_tflite_libs.sh
       - name: Build APK
         working-directory: example_camera_inference
         run: ./gradlew assembleDebug
