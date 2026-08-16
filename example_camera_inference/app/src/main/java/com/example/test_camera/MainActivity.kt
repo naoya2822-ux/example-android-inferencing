@@ -362,7 +362,7 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         resultTextView.visibility = View.GONE
     }, 1500)
-        }
+        
 
     // Load the native library
     init {
