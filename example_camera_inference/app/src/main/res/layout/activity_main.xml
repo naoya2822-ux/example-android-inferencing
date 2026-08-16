@@ -3,41 +3,65 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Camera Preview -->
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"/>
+        android:visibility="gone" />
 
-    <!-- Bounding Box Overlay (Hidden by Default) -->
     <com.example.test_camera.BoundingBoxOverlay
         android:id="@+id/boundingBoxOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
-    <!-- Result Display Frame -->
     <LinearLayout
+        android:id="@+id/startScreen"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical"
-        android:background="@android:color/holo_blue_light"
+        android:layout_height="match_parent"
         android:gravity="center"
-        android:elevation="4dp"
-        android:layout_gravity="bottom">
+        android:orientation="vertical"
+        android:padding="32dp">
 
         <TextView
-            android:id="@+id/resultTextView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Inference Results"
-            android:textSize="18sp"
-            android:textColor="@android:color/white"
-            android:gravity="center"
-            android:padding="8dp"/>
+            android:layout_marginBottom="40dp"
+            android:text="リモコン仕分け"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/startCameraButton"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:text="カメラ起動"
+            android:textSize="22sp" />
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/resultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#CC2196F3"
+        android:gravity="center"
+        android:padding="20dp"
+        android:text=""
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/finishWorkButton"
+        android:layout_width="160dp"
+        android:layout_height="56dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:text="作業終了"
+        android:textSize="18sp"
+        android:visibility="gone" />
 
 </FrameLayout>
