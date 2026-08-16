@@ -290,117 +290,79 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     // Display results in UI
     @SuppressLint("SetTextI18n")
     private fun displayResults(result: InferenceResult?) {
-        resultTextView.visibility = View.GONE
-        
+        private fun displayResults(result: InferenceResult?) {
 
-        if (result == null) {
-            resultTextView.text = "Error running inference"
-        } else
-        {
-            val combinedText = StringBuilder()
-            if (result.classification != null) {
-                val bestResult = result.classification.entries.maxByOrNull { it.value }
+    boundingBoxOverlay.visibility = View.GONE
 
-if (bestResult != null) {
+    if (result == null) {
+        resultTextView.visibility = View.VISIBLE
+        resultTextView.text = "判定エラー"
+        return
+    }
+
+    val bestResult = result.classification?.entries?.maxByOrNull { it.value }
+        ?: return
+
     val label = bestResult.key
     val confidence = bestResult.value
 
-    if (confidence >= 0.80f) {
+    // 信頼度80%未満は無視
+    if (confidence < 0.80f) {
+        return
+    }
 
-        val now = System.currentTimeMillis()
-        val sortingTime = now - lastDecisionTime
+    // リモコンが画面から消えたら、次の商品を判定できるようにする
+    if (label == "リモコン以外") {
+        decisionLocked = false
+        lastLabel = label
+        return
+    }
+
+    // 同じリモコンを置きっぱなしなら再カウントしない
+    if (decisionLocked) {
+        return
+    }
+
+    // 販売・捨てる以外はカウントしない
+    if (label != "販売" && label != "捨てる") {
+        return
+    }
+
+    val now = System.currentTimeMillis()
+    val sortingTime = now - lastDecisionTime
 
     when (label) {
+        "捨てる" -> discardCount++
+        "販売" -> recycleCount++
+    }
 
-    "捨てる" -> {
-        if (decisionLocked) {
-            return@runOnUiThread
+    totalCount++
+    totalSortingTimeMs += sortingTime
+
+    val seconds = sortingTime / 1000.0
+    val averageSeconds =
+        (totalSortingTimeMs / totalCount.toDouble()) / 1000.0
+
+    lastLabel = label
+    lastDecisionTime = now
+    decisionLocked = true
+
+    resultTextView.visibility = View.VISIBLE
+
+    resultTextView.text =
+        "\n判定：$label" +
+        "\n信頼度：${(confidence * 100).toInt()}%" +
+        "\n捨てる：${discardCount}個" +
+        "\n販売：${recycleCount}個" +
+        "\n合計：${totalCount}個" +
+        "\n今回：${"%.1f".format(seconds)}秒" +
+        "\n平均：${"%.1f".format(averageSeconds)}秒"
+
+    // 判定結果を1.5秒表示
+    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        resultTextView.visibility = View.GONE
+    }, 1500)
         }
-
-        discardCount++
-        totalCount++
-    }
-
-    "販売" -> {
-        if (decisionLocked) {
-            return@runOnUiThread
-        }
-
-        recycleCount++
-        totalCount++
-    }
-
-    "リモコン以外" -> {
-        decisionLocked = false
-        lastLabel = "リモコン以外"
-        return@runOnUiThread
-    }
-
-    else -> {
-        return@runOnUiThread
-    }
-    }
-        totalSortingTimeMs += sortingTime
-
-        val seconds = sortingTime / 1000.0
-        val averageSeconds =
-            (totalSortingTimeMs / totalCount.toDouble()) / 1000.0
-
-        lastLabel = label
-        lastDecisionTime = now
-        decisionLocked = true
-        combinedText.append(
-            "\n\n判定：$label" +
-            "\n信頼度：${(confidence * 100).toInt()}%" +
-            "\n捨てる：${discardCount}個" +
-            "\nリサイクル：${recycleCount}個" +
-            "\n合計：${totalCount}個" +
-            "\n今回：${"%.1f".format(seconds)}秒" +
-            "\n平均：${"%.1f".format(averageSeconds)}秒"
-        )
-    }
-}
-                // Display classification results
-                val classificationText = result.classification.entries.joinToString("\n") {
-                    "${it.key}: ${it.value}"
-                }
-                combinedText.append("Classification:\n$classificationText\n\n")
-            }
-            if (result.objectDetections != null) {
-                // Display object detection results
-//                val objectDetectionText = result.objectDetections.joinToString("\n") {
-//                    "${it.label}: ${it.confidence}, ${it.x}, ${it.y}, ${it.width}, ${it.height}"
-//                }
-                // Update bounding boxes on the overlay
-                boundingBoxOverlay.visibility = View.VISIBLE
-                boundingBoxOverlay.boundingBoxes = result.objectDetections
-                //combinedText.append("Object detection:\n$objectDetectionText\n\n")
-            }
-            if (result.visualAnomalyGridCells != null) {
-                // Display visual anomaly grid cells
-//                val visualAnomalyGridText = result.visualAnomalyGridCells.joinToString("\n") {
-//                    "${it.label}: ${it.confidence}, ${it.x}, ${it.y}, ${it.width}, ${it.height}"
-//                }
-                val visualAnomalyMax = result.anomalyResult?.getValue("max")
-                val visualAnomalyMean = result.anomalyResult?.getValue("mean")
-                boundingBoxOverlay.visibility = View.VISIBLE
-                boundingBoxOverlay.boundingBoxes = result.visualAnomalyGridCells
-                resultTextView.visibility = View.VISIBLE
-                combinedText.append("Visual anomaly values:\nMean: ${visualAnomalyMean}\nMax: ${visualAnomalyMax}")
-                //combinedText.append("Visual anomalies:\n$visualAnomalyGridText\n\nVisual anomaly values:\nMean: ${visualAnomalyMean}\nMax: ${visualAnomalyMax}\n\n")
-            }
-            if (result.anomalyResult?.get("anomaly") != null) {
-                // Display anomaly detection score
-                val anomalyScore = result.anomalyResult.get("anomaly")
-                combinedText.append("Anomaly score:\n${anomalyScore}")
-            }
-            // print the result
-            val textToDisplay = combinedText.toString()
-            //Log.d("MainActivity", "Result: $textToDisplay")
-            resultTextView.visibility = View.VISIBLE
-            resultTextView.text = textToDisplay
-        }
-    }
 
     // Load the native library
     init {
