@@ -349,14 +349,15 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
 
     resultTextView.visibility = View.VISIBLE
 val displayLabel = if (label == "スクラップ") "捨てる" else label
-    resultTextView.text =val displayLabel = if (label == "スクラップ") "捨てる" else label
-        "\n判定：$displayLabel" +
-        "\n信頼度：${(confidence * 100).toInt()}%" +
-        "\n捨てる：${discardCount}個" +
-        "\n販売：${recycleCount}個" +
-        "\n合計：${totalCount}個" +
-        "\n今回：${"%.1f".format(seconds)}秒" +
-        "\n平均：${"%.1f".format(averageSeconds)}秒"
+
+resultTextView.text =
+    "\n判定：$displayLabel" +
+    "\n信頼度：${(confidence * 100).toInt()}%" +
+    "\n捨てる：${discardCount}個" +
+    "\n販売：${recycleCount}個" +
+    "\n合計：${totalCount}個" +
+    "\n今回：${"%.1f".format(seconds)}秒" +
+    "\n平均：${"%.1f".format(averageSeconds)}秒"
 
     // 判定結果を1.5秒表示
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
