@@ -324,16 +324,16 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     }
 
     // 販売・捨てる以外はカウントしない
-    if (label != "販売" && label != "捨てる") {
-        return
+    if (label != "販売" && label != "スクラップ") {
+    return
     }
 
     val now = System.currentTimeMillis()
     val sortingTime = now - lastDecisionTime
 
     when (label) {
-        "捨てる" -> discardCount++
-        "販売" -> recycleCount++
+    "スクラップ" -> discardCount++
+    "販売" -> recycleCount++
     }
 
     totalCount++
@@ -349,8 +349,8 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
 
     resultTextView.visibility = View.VISIBLE
 
-    resultTextView.text =
-        "\n判定：$label" +
+    resultTextView.text =val displayLabel = if (label == "スクラップ") "捨てる" else label
+        "\n判定：$displayLabel" +
         "\n信頼度：${(confidence * 100).toInt()}%" +
         "\n捨てる：${discardCount}個" +
         "\n販売：${recycleCount}個" +
