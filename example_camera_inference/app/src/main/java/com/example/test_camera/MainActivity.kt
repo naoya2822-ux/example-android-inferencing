@@ -176,7 +176,7 @@ finishWorkButton.setOnClickListener {
 }
         }
 
-    }
+    
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
