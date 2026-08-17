@@ -305,6 +305,8 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
 
     val label = bestResult.key
     val confidence = bestResult.value
+        resultTextView.visibility = View.VISIBLE
+resultTextView.text = "AI判定：$label\n信頼度：${(confidence * 100).toInt()}%"
 
     // 信頼度80%未満は無視
     if (confidence < 0.80f) {
