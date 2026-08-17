@@ -348,7 +348,7 @@ val byteArray = getByteArrayFromBitmap(resizedBitmap)
     decisionLocked = true
 
     resultTextView.visibility = View.VISIBLE
-
+val displayLabel = if (label == "スクラップ") "捨てる" else label
     resultTextView.text =val displayLabel = if (label == "スクラップ") "捨てる" else label
         "\n判定：$displayLabel" +
         "\n信頼度：${(confidence * 100).toInt()}%" +
